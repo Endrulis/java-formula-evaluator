@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.client.RestTemplate;
 
-import static com.endrulis.evaluator.Observer.testConnection;
+import static com.endrulis.evaluator.Observer.start;
 
 @SpringBootApplication
 public class EvaluatorApplication {
@@ -13,7 +13,7 @@ public class EvaluatorApplication {
 		SpringApplication.run(EvaluatorApplication.class, args);
 		RestTemplate restTemplate = new RestTemplate();
 		SheetService sheetService = new SheetService(restTemplate);
-		testConnection(sheetService);
+		start(sheetService);
 	}
 
 }

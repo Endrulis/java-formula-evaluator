@@ -5,13 +5,14 @@ import com.endrulis.evaluator.services.SheetService;
 import java.util.Map;
 
 public class Observer {
-    public static void testConnection( SheetService sheetService) throws Exception {
+    public static void start( SheetService sheetService) throws Exception {
         try {
             System.out.println("Retrieving sheet data...");
-            Map<String, Object> response = sheetService.getSheetData();
+            Map<String, Object> responseData = sheetService.getSheetData();
             System.out.println("Successfully retrieved sheet data!");
-            sheetService.printSubmissionUrl(response);
-            sheetService.printSheetDetails(response);
+            String submissionUrl = sheetService.getSubmissionUrl(responseData);
+            sheetService.printSheetDetails(responseData);
+            sheetService.postData(submissionUrl, responseData);
         } catch (Exception e) {
             System.out.println("Error occurred while retrieving sheet data: " + e.getMessage());
         }
