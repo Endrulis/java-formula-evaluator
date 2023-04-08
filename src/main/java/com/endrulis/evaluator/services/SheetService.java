@@ -1,6 +1,8 @@
 package com.endrulis.evaluator.services;
 
 import com.endrulis.evaluator.entities.RequestBody;
+import com.endrulis.evaluator.entities.Sheet;
+import com.endrulis.evaluator.entities.SpreadSheet;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.*;
@@ -23,38 +25,33 @@ public class SheetService {
         this.restTemplate = restTemplate;
     }
 
-    public Map<String, Object> getSheetData() throws Exception {
-        Map<String, Object> response = restTemplate.getForObject(CONST_HUB_URL + "/sheets", Map.class);
-        if (response != null) {
-            return response;
+    public SpreadSheet getSheetData() throws Exception {
+        SpreadSheet spreadSheet = restTemplate.getForObject(CONST_HUB_URL + "/sheets", SpreadSheet.class);
+        if (spreadSheet != null) {
+            return spreadSheet;
         } else {
             throw new Exception("Failed to retrieve sheet data.");
         }
     }
 
-    public String getSubmissionUrl( Map<String, Object> responseData) {
-        String submissionUrl = (String) responseData.get("submissionUrl");
+    public String getSubmissionUrl( SpreadSheet responseData) {
+        String submissionUrl = responseData.getSubmissionUrl();
         System.out.println("Submission URL: " + submissionUrl);
         return submissionUrl;
     }
 
-    public void printSheetDetails(Map<String, Object> responseData) {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonNode = mapper.valueToTree(responseData.get("sheets"));
-        Iterator<JsonNode> sheets = jsonNode.elements();
-        while (sheets.hasNext()) {
-            JsonNode sheet = sheets.next();
-            System.out.println(sheet.get("id"));
-            System.out.println(sheet.get("data"));
+    public void printSheetDetails(SpreadSheet spreadSheet){
+        List<Sheet> sheets = spreadSheet.getSheets();
+        for (Sheet sheet : sheets) {
+            System.out.println(sheet.getId());
+            System.out.println(sheet.getData());
         }
     }
-    public void postData(String submissionUrl, Map<String, Object> responseData) {
+    public void postData(String submissionUrl, SpreadSheet spreadSheet) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        List<Map<String, Object>> sheets = (List<Map<String, Object>>) responseData.get("sheets");
-
-        RequestBody requestBody = new RequestBody(CONST_EMAIL, sheets);
+        RequestBody requestBody = new RequestBody(CONST_EMAIL, spreadSheet.getSheets());
         System.out.println("Request Body: " + requestBody);
         HttpEntity<RequestBody> requestEntity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(submissionUrl, requestEntity, String.class);
