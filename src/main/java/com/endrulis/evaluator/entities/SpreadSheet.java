@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class SpreadSheet {
     private String submissionUrl;
-    private List<Sheet> sheets;
+    private List<MySheet> sheets;
 }
