@@ -59,7 +59,7 @@ public class SheetService {
             System.out.println(sheet.getData());
             updatedSheets.add(updatedSheet);
         }
-        RequestBody requestBody = new RequestBody(CONST_EMAIL, spreadSheet.getSheets());
+        RequestBody requestBody = new RequestBody(CONST_EMAIL, updatedSheets);
         System.out.println("Request Body: " + requestBody);
         HttpEntity<RequestBody> requestEntity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(submissionUrl, requestEntity, String.class);
@@ -69,6 +69,7 @@ public class SheetService {
     private List<List<Object>> evaluateSheet(List<List<Object>> data) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet();
+        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
         for(int i = 0; i < data.size(); i++) {
             XSSFRow row = sheet.createRow(i);
             for(int j = 0; j < data.get(i).size(); j++) {
@@ -87,25 +88,40 @@ public class SheetService {
                     } else if (formula.startsWith("NOT(")) {
                         cell.setCellFormula(evaluateNOT(formula));
                     }else if (formula.startsWith("IF(")) {
-                        String[] args = formula.substring(3, formula.length() - 1).split(",");
+                        String[] args = formula.substring(3, formula.length() - 1).split(",(?![^()]*\\))");
                         String condition = args[0].trim();
                         String trueValue = args[1].trim();
                         String falseValue = args[2].trim();
                         StringBuilder sb = new StringBuilder();
-                        sb.append("IF(").append(condition).append("))*").append(falseValue);
+                        if (condition.startsWith("GT(")) {
+                            String customCondition = evaluateGT(condition);
+                            sb.append("IF(").append(customCondition).append(",").append(trueValue).append(",").append(falseValue).append(")");
+                        }
+                        System.out.println(sb.toString());
                         cell.setCellFormula(sb.toString());
-                    }else {
+                    }else if (formula.startsWith("CONCAT(")) {
+                        System.out.println("\"Hello\", \", \", \"World!\"");
+                        String[] args = formula.substring(7, formula.length() - 1).split(",");
+                        StringBuilder sb = new StringBuilder();
+                        for (String arg : args) {
+                            if (arg.startsWith("\"")) {
+                                sb.append(arg.substring(1, arg.length() - 1));
+                            }
+                        }
+                    }
+                    else {
                         cell.setCellFormula(formula);
                     }
                 }else if(data.get(i).get(j) instanceof Boolean){
                     cell.setCellValue(Boolean.parseBoolean(data.get(i).get(j).toString()));
+                }else if(data.get(i).get(j) instanceof String){
+                    cell.setCellValue(data.get(i).get(j).toString());
                 }
                 else {
                     cell.setCellValue(Double.parseDouble(data.get(i).get(j).toString()));
                 }
             }
         }
-        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
         evaluator.evaluateAll();
         List<List<Object>> result = new ArrayList<>();
         for(int i = 0; i < data.size(); i++) {
@@ -143,6 +159,7 @@ public class SheetService {
     }
 
     private static String evaluateGT( String formula ) {
+        System.out.println(formula);
         String[] args = formula.substring(3, formula.length() - 1).split(",");
         String arg1 = args[0].trim();
         String arg2 = args[1].trim();
