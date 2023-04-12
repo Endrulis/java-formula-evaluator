@@ -56,46 +56,75 @@ public class SheetService {
         Workbook workbook = new XSSFWorkbook();
         FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
         List<MySheet> updatedSheets = new ArrayList<>();
-        MySheet mySheet1 = spreadSheet.getSheets().get(8);
-        List<List<Object>> mySheet1Data = mySheet1.getData();
-        Sheet newSheet1 = workbook.createSheet(mySheet1.getId());
-        for (int i = 0; i < mySheet1Data.size(); i++) {
-            Row row = newSheet1.createRow(i);
-            for(int j = 0; j < mySheet1Data.get(i).size(); j++) {
+        MySheet mySheet = spreadSheet.getSheets().get(14);
+        List<List<Object>> mySheetData = mySheet.getData();
+        Sheet newSheet = workbook.createSheet(mySheet.getId());
+        for (int i = 0; i < mySheetData.size(); i++) {
+            Row row = newSheet.createRow(i);
+            for(int j = 0; j < mySheetData.get(i).size(); j++) {
                 Cell cell = row.createCell(j);
-                if(mySheet1Data.get(i).get(j) instanceof Integer){
-                    cell.setCellValue((Integer) mySheet1Data.get(i).get(j));
-                }else if(mySheet1Data.get(i).get(j) instanceof Boolean){
-                    cell.setCellValue(Boolean.parseBoolean(mySheet1Data.get(i).get(j).toString()));
-                }else if(mySheet1Data.get(i).get(j) instanceof String){
-                    cell.setCellValue(mySheet1Data.get(i).get(j).toString());
+                Object cellValue = mySheetData.get(i).get(j);
+                if(mySheetData.get(i).get(j) instanceof Integer){
+                    cell.setCellValue((Integer) cellValue);
+                }else if(mySheetData.get(i).get(j) instanceof Boolean){
+                    cell.setCellValue((Boolean) cellValue);
+                }else if(mySheetData.get(i).get(j) instanceof String){
+                    cell.setCellValue(cellValue.toString());
                 }else {
-                    cell.setCellValue(Double.parseDouble(mySheet1Data.get(i).get(j).toString()));
+                    cell.setCellValue(Double.parseDouble(mySheetData.get(i).get(j).toString()));
                 }
             }
         }
-        for (int i = 0; i < mySheet1Data.size(); i++) {
-            Row row = newSheet1.getRow(i);
-            for (int j = 0; j < mySheet1Data.get(i).size(); j++) {
+        for (int i = 0; i < mySheetData.size(); i++) {
+            Row row = newSheet.getRow(i);
+            for (int j = 0; j < mySheetData.get(i).size(); j++) {
                 Cell cell = row.getCell(j);
-                Object cellValue = mySheet1Data.get(i).get(j);
+                Object cellValue = mySheetData.get(i).get(j);
                 if (cellValue instanceof String && ((String) cellValue).startsWith("=")) {
                     String formula = ((String) cellValue).substring(1);
                     if (formula.startsWith("MULTIPLY(")) {
                         cell.setCellFormula(evaluateMultiply(formula));
+                        CellValue formulaValue = evaluator.evaluate(cell);
+                        cell.setCellValue(formulaValue.getNumberValue());
                     }else if (formula.startsWith("DIVIDE(")) {
                         cell.setCellFormula(evaluateDivision(formula));
-                    } else{
-                        cell.setCellFormula(formula);
+                        CellValue formulaValue = evaluator.evaluate(cell);
+                        cell.setCellValue(formulaValue.getNumberValue());
+                    }else if (formula.startsWith("GT(")) {
+                        cell.setCellFormula(evaluateGT(formula));
+                        CellValue formulaValue = evaluator.evaluate(cell);
+                        cell.setCellValue(formulaValue.getNumberValue());
+                        cell.setCellType(CellType.BOOLEAN);
+                    }else if (formula.startsWith("EQ(")) {
+                        cell.setCellFormula(evaluateEQ(formula));
+                        CellValue formulaValue = evaluator.evaluate(cell);
+                        cell.setCellValue(formulaValue.getNumberValue());
+                        cell.setCellType(CellType.BOOLEAN);
+                    }else if (formula.startsWith("NOT(")) {
+                        cell.setCellFormula(evaluateNOT(formula));
+                        CellValue formulaValue = evaluator.evaluate(cell);
+                        cell.setCellValue(formulaValue.getNumberValue());
+                        cell.setCellType(CellType.BOOLEAN);
+                    }else if(formula.startsWith("AND(")){
+                        cell.setCellFormula(evaluateAND(formula));
+                        System.out.println(cell.getCellFormula());
+                        CellValue formulaValue = evaluator.evaluate(cell);
+                        cell.setCellValue(formulaValue.getBooleanValue());
+                        cell.setCellType(CellType.BOOLEAN);
+                    }else if (formula.startsWith("IF(")) {
+                        cell.setCellFormula(evaluateIF(formula));
                     }
-                    CellValue formulaValue = evaluator.evaluate(cell);
-                    cell.setCellValue(formulaValue.getNumberValue());
+                    else {
+                        cell.setCellFormula(formula);
+                        CellValue formulaValue = evaluator.evaluate(cell);
+                        cell.setCellValue(formulaValue.getNumberValue());
+                    }
                 }
             }
         }
 
         List<List<Object>> updatedSheet1Data = new ArrayList<>();
-        for (Row row : newSheet1) {
+        for (Row row : newSheet) {
             List<Object> rowData = new ArrayList<>();
             for (Cell cell : row) {
                 switch (cell.getCellType()) {
@@ -119,8 +148,8 @@ public class SheetService {
             }
             updatedSheet1Data.add(rowData);
         }
-        MySheet updatedSheet1 = new MySheet(mySheet1.getId(), updatedSheet1Data);
-        updatedSheets.add(updatedSheet1);
+        MySheet updatedSheet = new MySheet(mySheet.getId(), updatedSheet1Data);
+        updatedSheets.add(updatedSheet);
 
         RequestBody requestBody = new RequestBody(CONST_EMAIL, updatedSheets);
         System.out.println("Request Body: " + requestBody);
@@ -128,6 +157,8 @@ public class SheetService {
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(submissionUrl, requestEntity, String.class);
         System.out.println("Response from server: " + responseEntity.getBody());
     }
+
+
 
     private List<List<Object>> evaluateSheet(List<List<Object>> data) {
         Workbook workbook = new XSSFWorkbook();
@@ -206,7 +237,23 @@ public class SheetService {
         }
         return result;
     }
-
+    private String evaluateIF(String formula) {
+        StringBuilder sb = new StringBuilder();
+        return sb.toString();
+    }
+    private String evaluateAND( String formula ) {
+        String[] args = formula.substring(4, formula.length() - 1).split(",");
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+        for (int i = 0; i < args.length; i++) {
+            sb.append(args[i].trim());
+            if (i < args.length - 1) {
+                sb.append("&");
+            }
+        }
+        sb.append(")*1");
+        return sb.toString();
+    }
     private static String evaluateNOT( String formula ) {
         String arg = formula.substring(4, formula.length() - 1).trim();
         StringBuilder sb = new StringBuilder();
