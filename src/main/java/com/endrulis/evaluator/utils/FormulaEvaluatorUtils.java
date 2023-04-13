@@ -2,13 +2,35 @@ package com.endrulis.evaluator.utils;
 
 public class FormulaEvaluatorUtils {
     public static String evaluateIF(String formula) {
+        String[] args = formula.substring(3, formula.length() - 1).split(",(?![^()]*\\))");
+        String condition = args[0].trim();
+        String trueValue = args[1].trim();
+        String falseValue = args[2].trim();
         StringBuilder sb = new StringBuilder();
+        if (condition.startsWith("GT(")) {
+            String customCondition = evaluateGT(condition);
+            sb.append("IF(").append(customCondition).append(",").append(trueValue).append(",").append(falseValue).append(")");
+        }
+        System.out.println(sb.toString());
         return sb.toString();
     }
     public static String evaluateAND( String formula ) {
         String[] args = formula.substring(4, formula.length() - 1).split(",");
         StringBuilder sb = new StringBuilder();
         sb.append("AND(");
+        for (int i = 0; i < args.length; i++) {
+            sb.append(args[i].trim());
+            if (i < args.length - 1) {
+                sb.append(",");
+            }
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+    public static String evaluateOR( String formula ) {
+        String[] args = formula.substring(3, formula.length() - 1).split(",");
+        StringBuilder sb = new StringBuilder();
+        sb.append("OR(");
         for (int i = 0; i < args.length; i++) {
             sb.append(args[i].trim());
             if (i < args.length - 1) {

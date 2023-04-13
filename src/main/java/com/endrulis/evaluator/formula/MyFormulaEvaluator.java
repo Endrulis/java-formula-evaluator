@@ -16,7 +16,7 @@ public class MyFormulaEvaluator {
                 if (cellValue instanceof String && ((String) cellValue).startsWith("=")) {
                     String formula = ((String) cellValue).substring(1);
                     evaluateFormulaInCell(evaluator, cell, formula);
-                    if(formula.startsWith("AND(")){
+                    if(formula.startsWith("AND(") || formula.startsWith("OR(")){
                         for(int k = 0; k < mySheetData.get(i).size(); k++){
                             if(k != j && row.getCell(k).getCellType() != cell.getCellType()){
                                 cell.setCellType(CellType.STRING);
@@ -56,12 +56,19 @@ public class MyFormulaEvaluator {
             cell.setCellType(CellType.BOOLEAN);
         }else if(formula.startsWith("AND(")){
             cell.setCellFormula(evaluateAND(formula));
-            System.out.println(cell.getCellFormula());
+            CellValue formulaValue = evaluator.evaluate(cell);
+            cell.setCellValue(formulaValue.getBooleanValue());
+            cell.setCellType(CellType.BOOLEAN);
+        }else if(formula.startsWith("OR(")){
+            cell.setCellFormula(evaluateOR(formula));
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getBooleanValue());
             cell.setCellType(CellType.BOOLEAN);
         }else if (formula.startsWith("IF(")) {
             cell.setCellFormula(evaluateIF(formula));
+            System.out.println(cell.getCellFormula());
+            CellValue formulaValue = evaluator.evaluate(cell);
+            cell.setCellValue(formulaValue.getNumberValue());
         }
         else {
             cell.setCellFormula(formula);
