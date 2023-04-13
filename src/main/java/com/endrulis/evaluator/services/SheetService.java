@@ -50,6 +50,24 @@ public class SheetService {
             System.out.println(sheet.getData());
         }
     }
+    private void fillNewSheetWithData(Sheet newSheet, List<List<Object>> mySheetData) {
+        for (int i = 0; i < mySheetData.size(); i++) {
+            Row row = newSheet.createRow(i);
+            for (int j = 0; j < mySheetData.get(i).size(); j++) {
+                Cell cell = row.createCell(j);
+                Object cellValue = mySheetData.get(i).get(j);
+                if (cellValue instanceof Integer) {
+                    cell.setCellValue((Integer) cellValue);
+                } else if (cellValue instanceof Boolean) {
+                    cell.setCellValue((Boolean) cellValue);
+                } else if (cellValue instanceof String) {
+                    cell.setCellValue(cellValue.toString());
+                } else {
+                    cell.setCellValue(Double.parseDouble(mySheetData.get(i).get(j).toString()));
+                }
+            }
+        }
+    }
     public void postData(String submissionUrl, SpreadSheet spreadSheet) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -59,22 +77,7 @@ public class SheetService {
         MySheet mySheet = spreadSheet.getSheets().get(14);
         List<List<Object>> mySheetData = mySheet.getData();
         Sheet newSheet = workbook.createSheet(mySheet.getId());
-        for (int i = 0; i < mySheetData.size(); i++) {
-            Row row = newSheet.createRow(i);
-            for(int j = 0; j < mySheetData.get(i).size(); j++) {
-                Cell cell = row.createCell(j);
-                Object cellValue = mySheetData.get(i).get(j);
-                if(mySheetData.get(i).get(j) instanceof Integer){
-                    cell.setCellValue((Integer) cellValue);
-                }else if(mySheetData.get(i).get(j) instanceof Boolean){
-                    cell.setCellValue((Boolean) cellValue);
-                }else if(mySheetData.get(i).get(j) instanceof String){
-                    cell.setCellValue(cellValue.toString());
-                }else {
-                    cell.setCellValue(Double.parseDouble(mySheetData.get(i).get(j).toString()));
-                }
-            }
-        }
+        fillNewSheetWithData(newSheet, mySheetData);
         for (int i = 0; i < mySheetData.size(); i++) {
             Row row = newSheet.getRow(i);
             for (int j = 0; j < mySheetData.get(i).size(); j++) {
