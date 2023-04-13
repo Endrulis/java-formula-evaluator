@@ -2,13 +2,12 @@ package com.endrulis.evaluator.formula;
 
 import org.apache.poi.ss.usermodel.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.endrulis.evaluator.utils.FormulaEvaluatorUtils.*;
 
-public class FormulaEvaluator {
-    public static void evaluateFormulasInNewSheet( org.apache.poi.ss.usermodel.FormulaEvaluator evaluator, List<List<Object>> mySheetData, Sheet newSheet ) {
+public class MyFormulaEvaluator {
+    public static void evaluateFormulasInNewSheet( FormulaEvaluator evaluator, List<List<Object>> mySheetData, Sheet newSheet ) {
         for (int i = 0; i < mySheetData.size(); i++) {
             Row row = newSheet.getRow(i);
             for (int j = 0; j < mySheetData.get(i).size(); j++) {
@@ -17,6 +16,15 @@ public class FormulaEvaluator {
                 if (cellValue instanceof String && ((String) cellValue).startsWith("=")) {
                     String formula = ((String) cellValue).substring(1);
                     evaluateFormulaInCell(evaluator, cell, formula);
+                    if(formula.startsWith("AND(")){
+                        for(int k = 0; k < mySheetData.get(i).size(); k++){
+                            if(k != j && row.getCell(k).getCellType() != cell.getCellType()){
+                                cell.setCellType(CellType.STRING);
+                                cell.setCellValue("#ERROR: type does not match");
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
