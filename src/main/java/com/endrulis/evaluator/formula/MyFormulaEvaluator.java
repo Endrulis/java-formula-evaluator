@@ -69,6 +69,12 @@ public class MyFormulaEvaluator {
             System.out.println(cell.getCellFormula());
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getNumberValue());
+        }else if (formula.startsWith("CONCAT(")) {
+            cell.setCellFormula(formula);
+            System.out.println(cell.getCellFormula());
+            CellValue formulaValue = evaluator.evaluate(cell);
+            cell.setCellValue(formulaValue.getStringValue());
+            cell.setCellType(CellType.STRING);
         }
         else {
             cell.setCellFormula(formula);
