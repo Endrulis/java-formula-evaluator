@@ -45,35 +45,42 @@ public class SheetService {
             System.out.println(sheet.getData());
         }
     }
-
-    public void postData(String submissionUrl, SpreadSheet spreadSheet) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+    public void updateSpreadsheetAndPostData( String submissionUrl, SpreadSheet spreadSheet) {
+        List<MySheet> updatedSheets = updateSpreadSheet(spreadSheet);
+        postData(submissionUrl, updatedSheets);
+    }
+    private List<MySheet> updateSpreadSheet( SpreadSheet spreadSheet ) {
         Workbook workbook = new XSSFWorkbook();
         FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
         List<MySheet> updatedSheets = new ArrayList<>();
         int count = 0;
         for (MySheet mySheet : spreadSheet.getSheets()) {
-            List<List<Object>> mySheetData = mySheet.getData();
-            Sheet newSheet = workbook.createSheet(mySheet.getId());
-            fillNewSheetWithData(newSheet, mySheetData);
-            evaluateFormulasInNewSheet(evaluator, mySheetData, newSheet);
-
+            Sheet newSheet = createNewSheet(workbook, mySheet);
+            fillNewSheetWithData(newSheet, mySheet.getData());
+            evaluateFormulasInNewSheet(evaluator, mySheet.getData(), newSheet);
             List<List<Object>> updatedSheetData = getUpdatedSheetData(evaluator, newSheet);
             MySheet updatedSheet = new MySheet(mySheet.getId(), updatedSheetData);
             updatedSheets.add(updatedSheet);
-
             count++;
-            if(count == 16){
-                break;
-            }
+            if(count == 16) break;
         }
-
+        return updatedSheets;
+    }
+    private void postData( String submissionUrl, List<MySheet> updatedSheets ) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
         RequestBody requestBody = new RequestBody(CONST_EMAIL, updatedSheets);
         System.out.println("Request Body: " + requestBody);
         HttpEntity<RequestBody> requestEntity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(submissionUrl, requestEntity, String.class);
         System.out.println("Response from server: " + responseEntity.getBody());
+    }
+
+
+
+    private static Sheet createNewSheet( Workbook workbook, MySheet mySheet ) {
+        Sheet newSheet = workbook.createSheet(mySheet.getId());
+        return newSheet;
     }
 
     private static List<List<Object>> getUpdatedSheetData( FormulaEvaluator evaluator, Sheet newSheet ) {
