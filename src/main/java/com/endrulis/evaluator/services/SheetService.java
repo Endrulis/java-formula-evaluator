@@ -56,7 +56,6 @@ public class SheetService {
         Workbook workbook = new XSSFWorkbook();
         FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
         List<MySheet> updatedSheets = new ArrayList<>();
-        int count = 0;
         for (MySheet mySheet : spreadSheet.getSheets()) {
             Sheet newSheet = createNewSheet(workbook, mySheet);
             fillNewSheetWithData(newSheet, mySheet.getData());
@@ -64,8 +63,6 @@ public class SheetService {
             List<List<Object>> updatedSheetData = getUpdatedSheetData(evaluator, newSheet);
             MySheet updatedSheet = new MySheet(mySheet.getId(), updatedSheetData);
             updatedSheets.add(updatedSheet);
-            count++;
-            if(count == 24) break;
         }
         return updatedSheets;
     }

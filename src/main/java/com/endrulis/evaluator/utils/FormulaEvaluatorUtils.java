@@ -11,7 +11,6 @@ public class FormulaEvaluatorUtils {
             String customCondition = evaluateGT(condition);
             sb.append("IF(").append(customCondition).append(",").append(trueValue).append(",").append(falseValue).append(")");
         }
-        System.out.println(sb.toString());
         return sb.toString();
     }
     public static String evaluateAND( String formula ) {
@@ -57,7 +56,6 @@ public class FormulaEvaluatorUtils {
     }
 
     public static String evaluateGT( String formula ) {
-        System.out.println(formula);
         String[] args = formula.substring(3, formula.length() - 1).split(",");
         String arg1 = args[0].trim();
         String arg2 = args[1].trim();

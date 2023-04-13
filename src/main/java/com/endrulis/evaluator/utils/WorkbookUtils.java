@@ -28,7 +28,7 @@ public class WorkbookUtils {
                             rowData.add(cellValue.getBooleanValue());
                         }else if (cellValue.getCellType() == CellType.STRING) {
                             rowData.add(cellValue.getStringValue());
-                        }else{
+                        }else if(cellValue.getCellType() == CellType.NUMERIC){
                             rowData.add(cellValue.getNumberValue());
                         }
                         break;

@@ -30,7 +30,7 @@ public class MyFormulaEvaluator {
         }
     }
 
-    private static void evaluateFormulaInCell( org.apache.poi.ss.usermodel.FormulaEvaluator evaluator, Cell cell, String formula ) {
+    private static void evaluateFormulaInCell(FormulaEvaluator evaluator, Cell cell, String formula ) {
         if (formula.startsWith("MULTIPLY(")) {
             cell.setCellFormula(evaluateMultiply(formula));
             CellValue formulaValue = evaluator.evaluate(cell);
@@ -76,8 +76,6 @@ public class MyFormulaEvaluator {
         }
         else {
             cell.setCellFormula(formula);
-            CellValue formulaValue = evaluator.evaluate(cell);
-            cell.setCellValue(formulaValue.getNumberValue());
         }
     }
 }
