@@ -1,5 +1,6 @@
 package com.endrulis.evaluator.utils;
 
+import com.endrulis.evaluator.entities.MySheet;
 import org.apache.poi.ss.usermodel.*;
 
 import java.util.ArrayList;
@@ -33,5 +34,29 @@ public class WorkbookUtils {
             updatedSheetData.add(rowData);
         }
         return updatedSheetData;
+    }
+    public static Sheet createNewSheet( Workbook workbook, MySheet mySheet ) {
+        Sheet newSheet = workbook.createSheet(mySheet.getId());
+        return newSheet;
+    }
+
+
+    public static void fillNewSheetWithData( Sheet newSheet, List<List<Object>> mySheetData ) {
+        for (int i = 0; i < mySheetData.size(); i++) {
+            Row row = newSheet.createRow(i);
+            for (int j = 0; j < mySheetData.get(i).size(); j++) {
+                Cell cell = row.createCell(j);
+                Object cellValue = mySheetData.get(i).get(j);
+                if (cellValue instanceof Integer) {
+                    cell.setCellValue((Integer) cellValue);
+                } else if (cellValue instanceof Boolean) {
+                    cell.setCellValue((Boolean) cellValue);
+                } else if (cellValue instanceof String) {
+                    cell.setCellValue(cellValue.toString());
+                } else {
+                    cell.setCellValue(Double.parseDouble(mySheetData.get(i).get(j).toString()));
+                }
+            }
+        }
     }
 }

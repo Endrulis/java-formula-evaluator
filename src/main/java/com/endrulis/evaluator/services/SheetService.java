@@ -14,7 +14,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 import static com.endrulis.evaluator.constants.AppConstants.*;
+import static com.endrulis.evaluator.formula.FormulaEvaluator.*;
 import static com.endrulis.evaluator.utils.WorkbookUtils.*;
+import static com.endrulis.evaluator.utils.FormulaEvaluatorUtils.*;
 
 public class SheetService {
 
@@ -77,151 +79,6 @@ public class SheetService {
         System.out.println("Response from server: " + responseEntity.getBody());
     }
 
-
-
-    private static Sheet createNewSheet( Workbook workbook, MySheet mySheet ) {
-        Sheet newSheet = workbook.createSheet(mySheet.getId());
-        return newSheet;
-    }
-
-
-    private void fillNewSheetWithData(Sheet newSheet, List<List<Object>> mySheetData) {
-        for (int i = 0; i < mySheetData.size(); i++) {
-            Row row = newSheet.createRow(i);
-            for (int j = 0; j < mySheetData.get(i).size(); j++) {
-                Cell cell = row.createCell(j);
-                Object cellValue = mySheetData.get(i).get(j);
-                if (cellValue instanceof Integer) {
-                    cell.setCellValue((Integer) cellValue);
-                } else if (cellValue instanceof Boolean) {
-                    cell.setCellValue((Boolean) cellValue);
-                } else if (cellValue instanceof String) {
-                    cell.setCellValue(cellValue.toString());
-                } else {
-                    cell.setCellValue(Double.parseDouble(mySheetData.get(i).get(j).toString()));
-                }
-            }
-        }
-    }
-    private void evaluateFormulasInNewSheet( FormulaEvaluator evaluator, List<List<Object>> mySheetData, Sheet newSheet ) {
-        for (int i = 0; i < mySheetData.size(); i++) {
-            Row row = newSheet.getRow(i);
-            for (int j = 0; j < mySheetData.get(i).size(); j++) {
-                Cell cell = row.getCell(j);
-                Object cellValue = mySheetData.get(i).get(j);
-                if (cellValue instanceof String && ((String) cellValue).startsWith("=")) {
-                    String formula = ((String) cellValue).substring(1);
-                    evaluateFormulaInCell(evaluator, cell, formula);
-                }
-            }
-        }
-    }
-
-    private void evaluateFormulaInCell( FormulaEvaluator evaluator, Cell cell, String formula ) {
-        if (formula.startsWith("MULTIPLY(")) {
-            cell.setCellFormula(evaluateMultiply(formula));
-            CellValue formulaValue = evaluator.evaluate(cell);
-            cell.setCellValue(formulaValue.getNumberValue());
-        }else if (formula.startsWith("DIVIDE(")) {
-            cell.setCellFormula(evaluateDivision(formula));
-            CellValue formulaValue = evaluator.evaluate(cell);
-            cell.setCellValue(formulaValue.getNumberValue());
-        }else if (formula.startsWith("GT(")) {
-            cell.setCellFormula(evaluateGT(formula));
-            CellValue formulaValue = evaluator.evaluate(cell);
-            cell.setCellValue(formulaValue.getNumberValue());
-            cell.setCellType(CellType.BOOLEAN);
-        }else if (formula.startsWith("EQ(")) {
-            cell.setCellFormula(evaluateEQ(formula));
-            CellValue formulaValue = evaluator.evaluate(cell);
-            cell.setCellValue(formulaValue.getNumberValue());
-            cell.setCellType(CellType.BOOLEAN);
-        }else if (formula.startsWith("NOT(")) {
-            cell.setCellFormula(evaluateNOT(formula));
-            CellValue formulaValue = evaluator.evaluate(cell);
-            cell.setCellValue(formulaValue.getNumberValue());
-            cell.setCellType(CellType.BOOLEAN);
-        }else if(formula.startsWith("AND(")){
-            cell.setCellFormula(evaluateAND(formula));
-            System.out.println(cell.getCellFormula());
-            CellValue formulaValue = evaluator.evaluate(cell);
-            cell.setCellValue(formulaValue.getBooleanValue());
-            cell.setCellType(CellType.BOOLEAN);
-        }else if (formula.startsWith("IF(")) {
-            cell.setCellFormula(evaluateIF(formula));
-        }
-        else {
-            cell.setCellFormula(formula);
-            CellValue formulaValue = evaluator.evaluate(cell);
-            cell.setCellValue(formulaValue.getNumberValue());
-        }
-    }
-    private String evaluateIF(String formula) {
-        StringBuilder sb = new StringBuilder();
-        return sb.toString();
-    }
-    private String evaluateAND( String formula ) {
-        String[] args = formula.substring(4, formula.length() - 1).split(",");
-        StringBuilder sb = new StringBuilder();
-        sb.append("(");
-        for (int i = 0; i < args.length; i++) {
-            sb.append(args[i].trim());
-            if (i < args.length - 1) {
-                sb.append("&");
-            }
-        }
-        sb.append(")*1");
-        return sb.toString();
-    }
-    private static String evaluateNOT( String formula ) {
-        String arg = formula.substring(4, formula.length() - 1).trim();
-        StringBuilder sb = new StringBuilder();
-        sb.append("(NOT(").append(arg).append("))*1");
-        return sb.toString();
-    }
-
-    private static String evaluateEQ( String formula ) {
-        String[] args = formula.substring(3, formula.length() - 1).split(",");
-        String arg1 = args[0].trim();
-        String arg2 = args[1].trim();
-        StringBuilder sb = new StringBuilder();
-        sb.append("(").append(arg1).append("=").append(arg2).append(")*1");
-        return sb.toString();
-    }
-
-    private static String evaluateGT( String formula ) {
-        System.out.println(formula);
-        String[] args = formula.substring(3, formula.length() - 1).split(",");
-        String arg1 = args[0].trim();
-        String arg2 = args[1].trim();
-        StringBuilder sb = new StringBuilder();
-        sb.append("(").append(arg1).append(">").append(arg2).append(")*1");
-        return sb.toString();
-    }
-
-    private String evaluateDivision( String formula ) {
-        String[] args = formula.substring(7, formula.length() - 1).split(",");
-        StringBuilder sb = new StringBuilder();
-        for (int k = 0; k < args.length; k++) {
-            if (k > 0) {
-                sb.append("/");
-            }
-            sb.append(args[k].trim());
-        }
-        return sb.toString();
-    }
-
-    private String evaluateMultiply( String formula ) {
-        String[] args = formula.substring(9, formula.length() - 1).split(",");
-        StringBuilder sb = new StringBuilder();
-        for (int k = 0; k < args.length; k++) {
-            if (k > 0) {
-                sb.append("*");
-            }
-            sb.append(args[k].trim());
-        }
-        return sb.toString();
-    }
     private List<List<Object>> evaluateSheet(List<List<Object>> data) {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet();
