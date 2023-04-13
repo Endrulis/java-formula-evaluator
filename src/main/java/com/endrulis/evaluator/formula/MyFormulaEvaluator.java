@@ -16,9 +16,9 @@ public class MyFormulaEvaluator {
                 if (cellValue instanceof String && ((String) cellValue).startsWith("=")) {
                     String formula = ((String) cellValue).substring(1);
                     evaluateFormulaInCell(evaluator, cell, formula);
-                    if(formula.startsWith("AND(") || formula.startsWith("OR(")){
-                        for(int k = 0; k < mySheetData.get(i).size(); k++){
-                            if(k != j && row.getCell(k).getCellType() != cell.getCellType()){
+                    if (formula.startsWith("AND(") || formula.startsWith("OR(")) {
+                        for (int k = 0; k < mySheetData.get(i).size(); k++) {
+                            if (k != j && row.getCell(k).getCellType() != cell.getCellType()) {
                                 cell.setCellType(CellType.STRING);
                                 cell.setCellValue("#ERROR: type does not match");
                                 break;
@@ -30,51 +30,50 @@ public class MyFormulaEvaluator {
         }
     }
 
-    private static void evaluateFormulaInCell(FormulaEvaluator evaluator, Cell cell, String formula ) {
+    private static void evaluateFormulaInCell( FormulaEvaluator evaluator, Cell cell, String formula ) {
         if (formula.startsWith("MULTIPLY(")) {
             cell.setCellFormula(evaluateMultiply(formula));
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getNumberValue());
-        }else if (formula.startsWith("DIVIDE(")) {
+        } else if (formula.startsWith("DIVIDE(")) {
             cell.setCellFormula(evaluateDivision(formula));
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getNumberValue());
-        }else if (formula.startsWith("GT(")) {
+        } else if (formula.startsWith("GT(")) {
             cell.setCellFormula(evaluateGT(formula));
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getNumberValue());
             cell.setCellType(CellType.BOOLEAN);
-        }else if (formula.startsWith("EQ(")) {
+        } else if (formula.startsWith("EQ(")) {
             cell.setCellFormula(evaluateEQ(formula));
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getNumberValue());
             cell.setCellType(CellType.BOOLEAN);
-        }else if (formula.startsWith("NOT(")) {
+        } else if (formula.startsWith("NOT(")) {
             cell.setCellFormula(evaluateNOT(formula));
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getNumberValue());
             cell.setCellType(CellType.BOOLEAN);
-        }else if(formula.startsWith("AND(")){
+        } else if (formula.startsWith("AND(")) {
             cell.setCellFormula(evaluateAND(formula));
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getBooleanValue());
             cell.setCellType(CellType.BOOLEAN);
-        }else if(formula.startsWith("OR(")){
+        } else if (formula.startsWith("OR(")) {
             cell.setCellFormula(evaluateOR(formula));
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getBooleanValue());
             cell.setCellType(CellType.BOOLEAN);
-        }else if (formula.startsWith("IF(")) {
+        } else if (formula.startsWith("IF(")) {
             cell.setCellFormula(evaluateIF(formula));
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getNumberValue());
-        }else if (formula.startsWith("CONCAT(")) {
+        } else if (formula.startsWith("CONCAT(")) {
             cell.setCellFormula(formula);
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getStringValue());
             cell.setCellType(CellType.STRING);
-        }
-        else {
+        } else {
             cell.setCellFormula(formula);
         }
     }

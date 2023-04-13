@@ -16,13 +16,12 @@ import java.util.*;
 import static com.endrulis.evaluator.constants.AppConstants.*;
 import static com.endrulis.evaluator.formula.MyFormulaEvaluator.*;
 import static com.endrulis.evaluator.utils.WorkbookUtils.*;
-import static com.endrulis.evaluator.utils.FormulaEvaluatorUtils.*;
 
 public class SheetService {
 
     private final RestTemplate restTemplate;
 
-    public SheetService(RestTemplate restTemplate) {
+    public SheetService( RestTemplate restTemplate ) {
         this.restTemplate = restTemplate;
     }
 
@@ -35,23 +34,25 @@ public class SheetService {
         }
     }
 
-    public String getSubmissionUrl( SpreadSheet responseData) {
+    public String getSubmissionUrl( SpreadSheet responseData ) {
         String submissionUrl = responseData.getSubmissionUrl();
         System.out.println("Submission URL: " + submissionUrl);
         return submissionUrl;
     }
 
-    public void displaySheetDetails( SpreadSheet spreadSheet){
+    public void displaySheetDetails( SpreadSheet spreadSheet ) {
         List<MySheet> sheets = spreadSheet.getSheets();
         for (MySheet sheet : sheets) {
             System.out.println(sheet.getId());
             System.out.println(sheet.getData());
         }
     }
-    public void updateSpreadsheetAndPostData( String submissionUrl, SpreadSheet spreadSheet) {
+
+    public void updateSpreadsheetAndPostData( String submissionUrl, SpreadSheet spreadSheet ) {
         List<MySheet> updatedSheets = updateSpreadSheet(spreadSheet);
         postData(submissionUrl, updatedSheets);
     }
+
     private List<MySheet> updateSpreadSheet( SpreadSheet spreadSheet ) {
         Workbook workbook = new XSSFWorkbook();
         FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
@@ -66,6 +67,7 @@ public class SheetService {
         }
         return updatedSheets;
     }
+
     private void postData( String submissionUrl, List<MySheet> updatedSheets ) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

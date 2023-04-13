@@ -10,42 +10,50 @@ public class WorkbookUtils {
     public static List<List<Object>> getUpdatedSheetData( FormulaEvaluator evaluator, Sheet newSheet ) {
         List<List<Object>> updatedSheetData = new ArrayList<>();
         for (Row row : newSheet) {
-            List<Object> rowData = new ArrayList<>();
-            for (Cell cell : row) {
-                switch (cell.getCellType()) {
-                    case STRING:
-                        rowData.add(cell.getStringCellValue());
-                        break;
-                    case NUMERIC:
-                        rowData.add(cell.getNumericCellValue());
-                        break;
-                    case BOOLEAN:
-                        rowData.add(cell.getBooleanCellValue());
-                        break;
-                    case FORMULA:
-                        CellValue cellValue = evaluator.evaluate(cell);
-                        if(cellValue.getCellType() == CellType.BOOLEAN) {
-                            rowData.add(cellValue.getBooleanValue());
-                        }else if (cellValue.getCellType() == CellType.STRING) {
-                            rowData.add(cellValue.getStringValue());
-                        }else if(cellValue.getCellType() == CellType.NUMERIC){
-                            rowData.add(cellValue.getNumberValue());
-                        }
-                        break;
-                    default:
-                        rowData.add(null);
-                        break;
-                }
-            }
+            List<Object> rowData = getRowData(evaluator, row);
             updatedSheetData.add(rowData);
         }
         return updatedSheetData;
     }
+
+    private static List<Object> getRowData( FormulaEvaluator evaluator, Row row ) {
+        List<Object> rowData = new ArrayList<>();
+        for (Cell cell : row) {
+            Object cellValue = getCellValue(evaluator, cell);
+            rowData.add(cellValue);
+        }
+        return rowData;
+    }
+
+    private static Object getCellValue( FormulaEvaluator evaluator, Cell cell ) {
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                return cell.getNumericCellValue();
+            case BOOLEAN:
+                return cell.getBooleanCellValue();
+            case FORMULA:
+                CellValue cellValue = evaluator.evaluate(cell);
+                switch (cellValue.getCellType()) {
+                    case BOOLEAN:
+                        return cellValue.getBooleanValue();
+                    case STRING:
+                        return cellValue.getStringValue();
+                    case NUMERIC:
+                        return cellValue.getNumberValue();
+                    default:
+                        return null;
+                }
+            default:
+                return null;
+        }
+    }
+
     public static Sheet createNewSheet( Workbook workbook, MySheet mySheet ) {
         Sheet newSheet = workbook.createSheet(mySheet.getId());
         return newSheet;
     }
-
 
     public static void fillNewSheetWithData( Sheet newSheet, List<List<Object>> mySheetData ) {
         for (int i = 0; i < mySheetData.size(); i++) {
@@ -57,7 +65,8 @@ public class WorkbookUtils {
             }
         }
     }
-    private static void setCellValue(Cell cell, Object cellValue) {
+
+    private static void setCellValue( Cell cell, Object cellValue ) {
         if (cellValue instanceof Integer) {
             cell.setCellValue((Integer) cellValue);
         } else if (cellValue instanceof Boolean) {
