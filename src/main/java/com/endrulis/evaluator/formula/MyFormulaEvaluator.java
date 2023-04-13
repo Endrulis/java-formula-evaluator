@@ -66,12 +66,10 @@ public class MyFormulaEvaluator {
             cell.setCellType(CellType.BOOLEAN);
         }else if (formula.startsWith("IF(")) {
             cell.setCellFormula(evaluateIF(formula));
-            System.out.println(cell.getCellFormula());
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getNumberValue());
         }else if (formula.startsWith("CONCAT(")) {
             cell.setCellFormula(formula);
-            System.out.println(cell.getCellFormula());
             CellValue formulaValue = evaluator.evaluate(cell);
             cell.setCellValue(formulaValue.getStringValue());
             cell.setCellType(CellType.STRING);

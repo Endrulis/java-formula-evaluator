@@ -24,7 +24,13 @@ public class WorkbookUtils {
                         break;
                     case FORMULA:
                         CellValue cellValue = evaluator.evaluate(cell);
-                        rowData.add(cellValue.getNumberValue());
+                        if(cellValue.getCellType() == CellType.BOOLEAN) {
+                            rowData.add(cellValue.getBooleanValue());
+                        }else if (cellValue.getCellType() == CellType.STRING) {
+                            rowData.add(cellValue.getStringValue());
+                        }else{
+                            rowData.add(cellValue.getNumberValue());
+                        }
                         break;
                     default:
                         rowData.add(null);
@@ -47,16 +53,19 @@ public class WorkbookUtils {
             for (int j = 0; j < mySheetData.get(i).size(); j++) {
                 Cell cell = row.createCell(j);
                 Object cellValue = mySheetData.get(i).get(j);
-                if (cellValue instanceof Integer) {
-                    cell.setCellValue((Integer) cellValue);
-                } else if (cellValue instanceof Boolean) {
-                    cell.setCellValue((Boolean) cellValue);
-                } else if (cellValue instanceof String) {
-                    cell.setCellValue(cellValue.toString());
-                } else {
-                    cell.setCellValue(Double.parseDouble(mySheetData.get(i).get(j).toString()));
-                }
+                setCellValue(cell, cellValue);
             }
+        }
+    }
+    private static void setCellValue(Cell cell, Object cellValue) {
+        if (cellValue instanceof Integer) {
+            cell.setCellValue((Integer) cellValue);
+        } else if (cellValue instanceof Boolean) {
+            cell.setCellValue((Boolean) cellValue);
+        } else if (cellValue instanceof String) {
+            cell.setCellValue(cellValue.toString());
+        } else {
+            cell.setCellValue(Double.parseDouble(cellValue.toString()));
         }
     }
 }
