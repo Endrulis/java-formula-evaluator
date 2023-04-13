@@ -8,14 +8,14 @@ public class FormulaEvaluatorUtils {
     public static String evaluateAND( String formula ) {
         String[] args = formula.substring(4, formula.length() - 1).split(",");
         StringBuilder sb = new StringBuilder();
-        sb.append("(");
+        sb.append("AND(");
         for (int i = 0; i < args.length; i++) {
             sb.append(args[i].trim());
             if (i < args.length - 1) {
-                sb.append("&");
+                sb.append(",");
             }
         }
-        sb.append(")*1");
+        sb.append(")");
         return sb.toString();
     }
     public static String evaluateNOT( String formula ) {

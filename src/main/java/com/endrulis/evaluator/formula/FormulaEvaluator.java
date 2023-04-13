@@ -2,6 +2,7 @@ package com.endrulis.evaluator.formula;
 
 import org.apache.poi.ss.usermodel.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.endrulis.evaluator.utils.FormulaEvaluatorUtils.*;
