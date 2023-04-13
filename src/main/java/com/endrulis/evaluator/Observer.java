@@ -7,10 +7,10 @@ public class Observer {
     public static void start( SheetService sheetService) throws Exception {
         try {
             System.out.println("Retrieving sheet data...");
-            SpreadSheet responseData = sheetService.getSheetData();
+            SpreadSheet responseData = sheetService.fetchSheetData();
             System.out.println("Successfully retrieved sheet data!");
             String submissionUrl = sheetService.getSubmissionUrl(responseData);
-            sheetService.printSheetDetails(responseData);
+            sheetService.displaySheetDetails(responseData);
             sheetService.updateSpreadsheetAndPostData(submissionUrl, responseData);
         } catch (Exception e) {
             System.out.println("Error occurred while retrieving sheet data: " + e.getMessage());

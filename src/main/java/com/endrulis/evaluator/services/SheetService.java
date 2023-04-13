@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 import static com.endrulis.evaluator.constants.AppConstants.*;
+import static com.endrulis.evaluator.utils.WorkbookUtils.*;
 
 public class SheetService {
 
@@ -23,7 +24,7 @@ public class SheetService {
         this.restTemplate = restTemplate;
     }
 
-    public SpreadSheet getSheetData() throws Exception {
+    public SpreadSheet fetchSheetData() throws Exception {
         SpreadSheet spreadSheet = restTemplate.getForObject(CONST_HUB_URL + "/sheets", SpreadSheet.class);
         if (spreadSheet != null) {
             return spreadSheet;
@@ -38,7 +39,7 @@ public class SheetService {
         return submissionUrl;
     }
 
-    public void printSheetDetails(SpreadSheet spreadSheet){
+    public void displaySheetDetails( SpreadSheet spreadSheet){
         List<MySheet> sheets = spreadSheet.getSheets();
         for (MySheet sheet : sheets) {
             System.out.println(sheet.getId());
@@ -83,34 +84,7 @@ public class SheetService {
         return newSheet;
     }
 
-    private static List<List<Object>> getUpdatedSheetData( FormulaEvaluator evaluator, Sheet newSheet ) {
-        List<List<Object>> updatedSheetData = new ArrayList<>();
-        for (Row row : newSheet) {
-            List<Object> rowData = new ArrayList<>();
-            for (Cell cell : row) {
-                switch (cell.getCellType()) {
-                    case STRING:
-                        rowData.add(cell.getStringCellValue());
-                        break;
-                    case NUMERIC:
-                        rowData.add(cell.getNumericCellValue());
-                        break;
-                    case BOOLEAN:
-                        rowData.add(cell.getBooleanCellValue());
-                        break;
-                    case FORMULA:
-                        CellValue cellValue = evaluator.evaluate(cell);
-                        rowData.add(cellValue.getNumberValue());
-                        break;
-                    default:
-                        rowData.add(null);
-                        break;
-                }
-            }
-            updatedSheetData.add(rowData);
-        }
-        return updatedSheetData;
-    }
+
     private void fillNewSheetWithData(Sheet newSheet, List<List<Object>> mySheetData) {
         for (int i = 0; i < mySheetData.size(); i++) {
             Row row = newSheet.createRow(i);
