@@ -1,7 +1,7 @@
 package com.endrulis.evaluator.utils;
 
-import com.endrulis.evaluator.formula.parser.GtFormulaParser;
-import com.endrulis.evaluator.formula.parser.MultiplicationFormulaParser;
+import com.endrulis.evaluator.formula.parsers.GtFormulaParser;
+import com.endrulis.evaluator.formula.parsers.MultiplicationFormulaParser;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

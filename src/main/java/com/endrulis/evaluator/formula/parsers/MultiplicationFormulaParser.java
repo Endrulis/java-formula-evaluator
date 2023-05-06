@@ -1,4 +1,4 @@
-package com.endrulis.evaluator.formula.parser;
+package com.endrulis.evaluator.formula.parsers;
 
 import com.endrulis.evaluator.formula.CellFormulaHandler;
 import com.endrulis.evaluator.formula.FormulaParser;
@@ -16,7 +16,8 @@ public class MultiplicationFormulaParser extends FormulaParser {
             String arg = args.get(k).trim();
             if (arg.contains("(") && arg.contains(")")) {
                 FormulaParser formulaParser = CellFormulaHandler.getParserForFormula(arg);
-                arg = "(" + formulaParser.evaluateFormula(arg) + ")";
+                if(formulaParser!= null)
+                    arg = "(" + formulaParser.evaluateFormula(arg) + ")";
             }
             result.append(arg);
             if (k < args.size() - 1) {

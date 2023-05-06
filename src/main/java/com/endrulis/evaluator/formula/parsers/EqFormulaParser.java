@@ -1,4 +1,4 @@
-package com.endrulis.evaluator.formula.parser;
+package com.endrulis.evaluator.formula.parsers;
 
 import com.endrulis.evaluator.formula.FormulaParser;
 

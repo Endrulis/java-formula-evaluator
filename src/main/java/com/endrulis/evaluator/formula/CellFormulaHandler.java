@@ -1,12 +1,29 @@
 package com.endrulis.evaluator.formula;
 
-import com.endrulis.evaluator.formula.parser.*;
+import com.endrulis.evaluator.formula.parsers.*;
 import com.endrulis.evaluator.utils.FormulaEvaluatorHelper;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class CellFormulaHandler {
+    private static final Map<String, Class<? extends FormulaParser>> formulaParsers = new HashMap<>();
+    static {
+        formulaParsers.put("SUM(MULTIPLY(", SumMultiplyFormulaParser.class);
+        formulaParsers.put("MULTIPLY(", MultiplicationFormulaParser.class);
+        formulaParsers.put("DIVIDE(", DivisionFormulaParser.class);
+        formulaParsers.put("IF(", IfFormulaParser.class);
+        formulaParsers.put("GT(", GtFormulaParser.class);
+        formulaParsers.put("LT(", LtFormulaParser.class);
+        formulaParsers.put("EQ(", EqFormulaParser.class);
+        formulaParsers.put("NOT(", NotFormulaParser.class);
+        formulaParsers.put("AND(", AndFormulaParser.class);
+        formulaParsers.put("OR(", OrFormulaParser.class);
+        formulaParsers.put("SUM(", SumFormulaParser.class);
+    }
     public static void evaluateFormulaInCell( FormulaEvaluator evaluator, Cell cell, String formula ) {
         FormulaParser parser = getParserForFormula(formula);
         if (parser != null) {
@@ -26,31 +43,16 @@ public class CellFormulaHandler {
             cell.setCellFormula(formula);
         }
     }
-    public static FormulaParser getParserForFormula( String formula ) {
-        if (formula.startsWith("SUM(MULTIPLY(")) {
-            return new SumMultiplyFormulaParser();
-        } else if (formula.startsWith("MULTIPLY(")) {
-            return new MultiplicationFormulaParser();
-        } else if (formula.startsWith("DIVIDE(")) {
-            return new DivisionFormulaParser();
-        } else if (formula.startsWith("IF(")) {
-            return new IfFormulaParser();
-        } else if (formula.startsWith("GT(")) {
-            return new GtFormulaParser();
-        } else if (formula.startsWith("LT(")) {
-            return new LtFormulaParser();
-        } else if (formula.startsWith("EQ(")) {
-            return new EqFormulaParser();
-        } else if (formula.startsWith("NOT(")) {
-            return new NotFormulaParser();
-        } else if (formula.startsWith("AND(")) {
-            return new AndFormulaParser();
-        } else if (formula.startsWith("OR(")) {
-            return new OrFormulaParser();
-        }else if (formula.startsWith("SUM(")) {
-            return new SumFormulaParser();
-        }else {
-            return null;
+    public static FormulaParser getParserForFormula(String formula) {
+        for (String prefix : formulaParsers.keySet()) {
+            if (formula.startsWith(prefix)) {
+                try {
+                    return formulaParsers.get(prefix).newInstance();
+                } catch (InstantiationException | IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
         }
+        return null;
     }
 }
