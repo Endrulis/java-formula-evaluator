@@ -1,6 +1,7 @@
 package com.endrulis.evaluator.utils;
 
 import com.endrulis.evaluator.formula.parser.GtFormulaParser;
+import com.endrulis.evaluator.formula.parser.MultiplicationFormulaParser;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -25,5 +26,13 @@ public class FormulaEvaluator {
         String expected = "(2=2)*1";
         String result = new GtFormulaParser().evaluateFormula(formula);
         assertEquals(expected, result);
+    }
+    @Test
+    void testMultiplicationFormulaWithNestedFormulas() {
+        String formula = "MULTIPLY(SUM(2, 3), MULTIPLY(4, 5), MULTIPLY(4, 5))";
+        MultiplicationFormulaParser parser = new MultiplicationFormulaParser();
+        String expected = "(((2+3)*1)*((4*5)*1)*((4*5)*1))*1";
+        String actual = parser.evaluateFormula(formula);
+        assertEquals(expected, actual);
     }
 }

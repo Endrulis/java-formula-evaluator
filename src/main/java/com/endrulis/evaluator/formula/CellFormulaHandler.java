@@ -26,7 +26,7 @@ public class CellFormulaHandler {
             cell.setCellFormula(formula);
         }
     }
-    private static FormulaParser getParserForFormula( String formula ) {
+    public static FormulaParser getParserForFormula( String formula ) {
         if (formula.startsWith("SUM(MULTIPLY(")) {
             return new SumMultiplyFormulaParser();
         } else if (formula.startsWith("MULTIPLY(")) {
@@ -47,6 +47,8 @@ public class CellFormulaHandler {
             return new AndFormulaParser();
         } else if (formula.startsWith("OR(")) {
             return new OrFormulaParser();
+        }else if (formula.startsWith("SUM(")) {
+            return new SumFormulaParser();
         }else {
             return null;
         }
