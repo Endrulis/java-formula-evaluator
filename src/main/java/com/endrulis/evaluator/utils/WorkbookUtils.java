@@ -1,6 +1,6 @@
 package com.endrulis.evaluator.utils;
 
-import com.endrulis.evaluator.entities.MySheet;
+import com.endrulis.evaluator.entities.ExcelSheet;
 import org.apache.poi.ss.usermodel.*;
 
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class WorkbookUtils {
         }
     }
 
-    public static Sheet createNewSheet( Workbook workbook, MySheet mySheet ) {
+    public static Sheet createNewSheet( Workbook workbook, ExcelSheet mySheet ) {
         Sheet newSheet = workbook.createSheet(mySheet.getId());
         return newSheet;
     }

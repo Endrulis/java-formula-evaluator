@@ -10,7 +10,7 @@ import static com.endrulis.evaluator.SpreadsheetObserver.start;
 @SpringBootApplication
 public class EvaluatorApplication {
     public static void main( String[] args ) throws Exception {
-        SpringApplication.run(EvaluatorApplication.class, args);
+//        SpringApplication.run(EvaluatorApplication.class, args);
         RestTemplate restTemplate = new RestTemplate();
         SheetService sheetService = new SheetService(restTemplate);
         start(sheetService);

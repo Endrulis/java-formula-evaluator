@@ -1,8 +1,10 @@
 package com.endrulis.evaluator.services;
 
 import com.endrulis.evaluator.entities.RequestBody;
-import com.endrulis.evaluator.entities.MySheet;
+import com.endrulis.evaluator.entities.ExcelSheet;
 import com.endrulis.evaluator.entities.SpreadSheet;
+import com.endrulis.evaluator.formula.ExcelFormulaEvaluator;
+import com.endrulis.evaluator.utils.WorkbookUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpEntity;
@@ -14,7 +16,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 import static com.endrulis.evaluator.constants.AppConstants.*;
-import static com.endrulis.evaluator.formula.MyFormulaEvaluator.*;
 import static com.endrulis.evaluator.utils.WorkbookUtils.*;
 
 public class SheetService {
@@ -26,7 +27,7 @@ public class SheetService {
     }
 
     public SpreadSheet fetchSheetData() throws Exception {
-        SpreadSheet spreadSheet = restTemplate.getForObject(CONST_HUB_URL + "/sheets", SpreadSheet.class);
+        SpreadSheet spreadSheet = restTemplate.getForObject(CONST_HUB_URL + "/sheets/?tag=nested_structures", SpreadSheet.class);
         if (spreadSheet != null) {
             return spreadSheet;
         } else {
@@ -41,34 +42,29 @@ public class SheetService {
     }
 
     public void displaySheetDetails( SpreadSheet spreadSheet ) {
-        List<MySheet> sheets = spreadSheet.getSheets();
-        for (MySheet sheet : sheets) {
+        List<ExcelSheet> sheets = spreadSheet.getSheets();
+        for (ExcelSheet sheet : sheets) {
             System.out.println(sheet.getId());
             System.out.println(sheet.getData());
         }
     }
 
-    public void updateSpreadsheetAndPostData( String submissionUrl, SpreadSheet spreadSheet ) {
-        List<MySheet> updatedSheets = updateSpreadSheet(spreadSheet);
-        postData(submissionUrl, updatedSheets);
-    }
-
-    private List<MySheet> updateSpreadSheet( SpreadSheet spreadSheet ) {
+    public List<ExcelSheet> updateSpreadSheet( SpreadSheet spreadSheet ) {
         Workbook workbook = new XSSFWorkbook();
         FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-        List<MySheet> updatedSheets = new ArrayList<>();
-        for (MySheet mySheet : spreadSheet.getSheets()) {
-            Sheet newSheet = createNewSheet(workbook, mySheet);
-            fillNewSheetWithData(newSheet, mySheet.getData());
-            evaluateFormulasInNewSheet(evaluator, mySheet.getData(), newSheet);
-            List<List<Object>> updatedSheetData = getUpdatedSheetData(evaluator, newSheet);
-            MySheet updatedSheet = new MySheet(mySheet.getId(), updatedSheetData);
+        List<ExcelSheet> updatedSheets = new ArrayList<>();
+        for (ExcelSheet excelSheet : spreadSheet.getSheets()) {
+            Sheet newSheet = createNewSheet(workbook, excelSheet);
+            WorkbookUtils.fillNewSheetWithData(newSheet, excelSheet.getData());
+            ExcelFormulaEvaluator.evaluateFormulasInNewSheet(evaluator, excelSheet.getData(), newSheet);
+            List<List<Object>> updatedSheetData = WorkbookUtils.getUpdatedSheetData(evaluator, newSheet);
+            ExcelSheet updatedSheet = new ExcelSheet(excelSheet.getId(), updatedSheetData);
             updatedSheets.add(updatedSheet);
         }
         return updatedSheets;
     }
 
-    private void postData( String submissionUrl, List<MySheet> updatedSheets ) {
+    public void postData( String submissionUrl, List<ExcelSheet> updatedSheets ) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         RequestBody requestBody = new RequestBody(CONST_EMAIL, updatedSheets);

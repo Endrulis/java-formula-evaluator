@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MySheet {
+public class ExcelSheet {
     private String id;
     private List<List<Object>> data;
 
